@@ -1,70 +1,43 @@
-# Contour Detection and Simplification Tool
+# Satellite Image Contouring
 
-## Overview
-This project provides an image processing pipeline designed to detect and simplify contours in images. It involves preprocessing images to enhance contrast and remove noise, detecting edges using the Prewitt operator, finding connected components, and simplifying these contours using the Douglas-Peucker algorithm. The result is a visualization of both raw and simplified contours that can aid in computer vision tasks such as object recognition, feature extraction, or shape analysis.
+An image processing pipeline that detects and simplifies contours in satellite imagery. The pipeline preprocesses the input image (grayscale conversion, Gaussian blur, CLAHE contrast enhancement, shadow removal), detects edges using a manually implemented Prewitt operator, groups connected pixels into separate contours, and then simplifies them using the Douglas-Peucker algorithm — also implemented from scratch rather than relying on OpenCV's built-in version.
 
-## Features
-- **Image Preprocessing**: Converts images to grayscale, applies Gaussian blur, enhances contrast using CLAHE, and removes shadows.
-- **Edge Detection**: Implements the Prewitt operator for edge detection.
-- **Contour Extraction**: Identifies connected pixel components to form contours.
-- **Contour Simplification**: Uses the Douglas-Peucker algorithm to reduce the number of points in contours while preserving their shape.
-- **Visualization**: Displays images and detected contours using Matplotlib.
+The project was built as part of a computer vision course, with the goal of understanding how contour detection works under the hood rather than just calling library functions.
 
-## Installation
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/username/contour-detection-tool.git
-   cd contour-detection-tool
-   ```
+## How it works
 
-2. Install required Python packages:
-   ```bash
-   pip install -r requirements.txt
-   ```
+The input image goes through several stages. First, it gets converted to grayscale and denoised with a Gaussian blur. Then CLAHE is applied to improve local contrast, and a simple threshold-based shadow mask removes dark regions that would otherwise produce false edges.
 
-## Dependencies
-- Python 3.x
-- OpenCV (`cv2`)
-- Matplotlib
-- NumPy
-- SciPy
+Edge detection is done with the Prewitt operator — two 3x3 convolution kernels (horizontal and vertical) are applied to the image, and the gradient magnitude is computed from both directions. The resulting edge map is binarized and passed through scipy's connected component labeling to extract individual contours.
+
+Finally, each contour is simplified using a recursive Douglas-Peucker implementation that reduces the number of points while preserving the overall shape. The epsilon parameter controls how aggressively points are removed.
+
+## Requirements
+
+```
+pip install -r requirements.txt
+```
+
+OpenCV, NumPy, SciPy, Matplotlib.
 
 ## Usage
-1. **Load an Image**:
-   Replace `photos/2.png` with your image path or modify the `input_image` variable accordingly.
 
-2. **Run the Script**:
-   Execute the script to preprocess the image, detect contours, and display visualizations:
-   ```bash
-   python main.py
-   ```
+Place your image in the `photos/` directory and update the filename in `main.py`:
 
-3. **View Results**:
-   The script will display:
-   - The original image.
-   - The preprocessed image.
-   - The image with detected contours.
-   - Visualizations of raw and simplified contours.
+```bash
+python main.py
+```
 
-## Code Structure
-- **`preprocess_image()`**: Prepares the image by converting it to grayscale, applying Gaussian blur, enhancing contrast, and removing shadows.
-- **`detect_edges_with_prewitt()`**: Applies the Prewitt operator for edge detection.
-- **`find_connected_components()`**: Identifies groups of connected pixels to form contours.
-- **`simplify_contour_douglas_peucker()`**: Simplifies detected contours to reduce data while maintaining shape.
-- **`visualize_contours()`**: Plots the contours for easy inspection.
+The script displays the original image, the preprocessed version, detected edges, raw contours, and simplified contours.
 
-## Future Enhancements
-- Add support for color image processing.
-- Integrate a graphical user interface (GUI) for easier interaction.
-- Deploy as a web application using `Flask` or `Streamlit`.
-- Optimize performance with parallel processing or library optimizations.
+## Example workflow
 
-## Contribution
-Feel free to fork this project, submit issues, or create pull requests. Contributions are welcome!
+![Original satellite image](workflow-photos/1-original.png)
 
-## License
-This project is licensed under the MIT License. See the LICENSE file for more details.
+![Preprocessed image](workflow-photos/2-preprocessed.png)
 
----
+![Edge detection with Prewitt operator](workflow-photos/3-edges.png)
 
-This README outlines the project comprehensively and provides clear instructions for usage and further development.
+![Separated contours](workflow-photos/4-contours.png)
+
+![Simplified contours after Douglas-Peucker](workflow-photos/5-simplified.png)
